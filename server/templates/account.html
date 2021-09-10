@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      html {
+        font-family: "Titillium Web", sans-serif;
+      }
+
+      .menu {
+        display: flex;
+        justify-content: space-between;
+        flex-direction: row;
+        align-items: center;
+      }
+
+      .menu a {
+        color: black;
+        text-decoration: none;
+        font-weight: bold;
+        border: solid 3px black;
+        border-radius: 10px;
+        font-size: 18px;
+        padding: 0 10px;
+        margin: 0 15px;
+      }
+
+      .menu a:hover {
+        background-color: black;
+        color: white;
+        transition: 0.25s;
+      }
+      .logo {
+        border-radius: 10px;
+        border: solid 5px black;
+        width: 130px;
+        margin: 15px;
+        padding: 4px;
+        text-align: center;
+      }
+
+      .logo:hover {
+        border: solid 5px white;
+        transition: 0.25s;
+        background-color: black;
+        color: white;
+      }
+      .error{
+        margin-top: 10px;
+      }
+      .signup_container{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        
+        width: auto;
+        justify-content: center;
+        
+      }
+    </style>
+  </head>
+  <body>
+    <div class="menu">
+      <div>
+        <h1 class="logo">Adbuddy</h1>
+      </div>
+      <div>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/logout">Logout</a>
+      </div>
+    </div>
+    <p>{{username}}</p>
+    
+    
+    <form action="change_password" method="post">
+      <div class="input_field">
+
+        <input type="password" placeholder="Current Password" name="Current Password" value="{{
+          request.form.current_password }}">
+      </div>
+      <div class="input_field">
+        <input type="password" placeholder="New Password" name="new_password" value="{{
+          request.form.new_password }}">
+      </div>
+      <div class="input_field">
+        <input type="password" placeholder="Confirm New Password" name="confirm_password" value="{{
+          request.form.confirm_password }}">
+      </div>
+      <div>
+        <input class="btn btn-default" type="submit" value="Change Password">
+      </div>
+      <div>
+        
+
+      </div>
+       
+      </form>
+    {% if error %}
+      <div class="error"><strong>Error:</strong> {{ error }}
+    {% endif %}
+
+ 
+
+  </body>
+</html>

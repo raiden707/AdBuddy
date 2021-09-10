@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://api.mapbox.com/mapbox-gl-js/v2.4.1/mapbox-gl.css"
+      rel="stylesheet"
+    />
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.4.1/mapbox-gl.js"></script>
+    <style>
+      html {
+        font-family: "Titillium Web", sans-serif;
+      }
+
+      #dashboard_container {
+        display: flex;
+        justify-content: center;
+      }
+
+      #map {
+        position: absolute;
+        margin-left: 10%;
+        width: 50%;
+        height: 50%;
+      }
+
+      #account {
+        display: none;
+        justify-content: center;
+      }
+      .menu {
+        display: flex;
+        justify-content: space-between;
+        flex-direction: row;
+
+        align-items: center;
+      }
+
+      .menu a {
+        color: black;
+        text-decoration: none;
+        font-weight: bold;
+        border: solid 3px black;
+        border-radius: 10px;
+        font-size: 18px;
+        padding: 0 10px;
+        margin: 0 15px;
+      }
+
+      .menu a:hover {
+        background-color: black;
+        color: white;
+        transition: 0.25s;
+      }
+
+      .logo {
+        border-radius: 10px;
+        border: solid 5px black;
+        width: 130px;
+        margin: 15px;
+        padding: 4px;
+        text-align: center;
+      }
+
+      .logo:hover {
+        border: solid 5px white;
+        transition: 0.25s;
+        background-color: black;
+        color: white;
+      }
+      
+    </style>
+  </head>
+
+  <body>
+    <div class="menu">
+      <div>
+        <h1 class="logo">Adbuddy</h1>
+      </div>
+      <div>
+        <a href="/account">Account</a>
+        <a href="/logout">Logout</a>
+      </div>
+    </div>
+    <p>{{username}}</p>
+    <div id="dashboard">
+      <h2>Dashboard</h2>
+      <div class="dashboard_container">
+        <div id="map"></div>
+      </div>
+    </div>
+    <div id="account">
+      <h1>Account</h1>
+    </div>
+
+    
+    <script>
+      mapboxgl.accessToken =
+        "pk.eyJ1IjoiYWhtZWRiayIsImEiOiJja2R2eGlkcHAwN2JvMzBvYTl4czd3dzZzIn0.Ccq18-GPO-1iEyxMctLhSw";
+      const map = new mapboxgl.Map({
+        container: "map", // container ID
+        style: "mapbox://styles/mapbox/streets-v11", // style URL
+        center: [-74.5, 40], // starting position [lng, lat]
+        zoom: 9, // starting zoom
+      });
+      // Add the control to the map.
+      map.addControl(
+        new MapboxGeocoder({
+          accessToken: mapboxgl.accessToken,
+          mapboxgl: mapboxgl,
+        })
+      );
+      // test marker
+      var marker = new mapboxgl.Marker({
+        color: "#FFFFFF",
+        draggable: false,
+      })
+        .setLngLat([-121.91, 37.7])
+        .setPopup(new mapboxgl.Popup().setHTML("<h3>Dublin, CA</h3>"))
+        .addTo(map);
+
+      
+    </script>
+  </body>
+</html>
