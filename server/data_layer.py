@@ -1,9 +1,6 @@
 from datetime import datetime
-from logging import log
 from sqlite3 import Error
-from sqlite3.dbapi2 import Cursor
 from map import get_coords
-from pprint import pprint
 
 import sqlite3
 import bcrypt
@@ -11,17 +8,16 @@ import crypto
 import random
 import time
 import json
-"""
-/Users/raiden/Dropbox/Final Project/App/adbuddy
-"""
 
-#db_file = r"D:/Documents/Dropbox/Dropbox/Final Project/App/adbuddy/adbuddy.db"
 
-db_file = "/Users/raiden/Dropbox/Final Project/App/adbuddy/adbuddy.db"
+db_file = r"D:/Documents/Dropbox/Dropbox/Final Project/App/adbuddy/adbuddy.db"
+
+#db_file = "/Users/raiden/Dropbox/Final Project/App/adbuddy/adbuddy.db"
 
 
 def create_connection(db_file):
     """
+    (str) -> sqlite3.connection
     Establishes a connection with the SQLite DB
     """
     conn = None
@@ -33,13 +29,13 @@ def create_connection(db_file):
 
     return conn
 
-
+#connection is the only global variable in this file
 connection = create_connection(db_file)
-
 
 def pull_id(username):
     """
     (string) - > string or Bool
+    Retrieves the UID for a given username
     1. Take username
     2. Pull UID from user table
     """
@@ -52,26 +48,27 @@ def pull_id(username):
         return UID
     else:
         return False
+        
 
 
 def initialize_setup_status(username):
     """
     (string) -> NoneType
-    This method adds false to the setup status upon user sign up
+    This method adds false to the setup status upon user sign up. 
+    This is done so that the user cannot access their dashboard until they have completed all setup stages
 
     1. Pull UID
     2. Add False to status table upon signup
 
     """
-    UID = str(pull_id(username))
+    UID = pull_id(username)
 
-    sql_statement = "INSERT INTO status VALUES (?,?)"
+    sql_statement = "INSERT INTO status VALUES (?,?,?)"
     cursor = connection.cursor()
 
     try:
-        cursor.execute(sql_statement, [UID, "False"])
+        cursor.execute(sql_statement, [UID, "False","name"])
         connection.commit()
-
     except Error as e:
         return(e)
 
@@ -95,12 +92,11 @@ def signup(username, password):
     try:
         cursor.execute(sql_statement, [random.randint(
             1000, 9999), username, hashed_password])
-        connection.commit()
         initialize_setup_status(username)
-
+        connection.commit()
+        
     except Error as e:
         return(e)
-
 
 def check_user(username):
     '''
@@ -109,6 +105,8 @@ def check_user(username):
     output: True if user exists
 
     1. Check if username exists
+    2. If yes, return the username
+    3. If no, return False
     '''
     sql_statement = "SELECT * FROM users WHERE username = ?"
     cursor = connection.cursor()
@@ -119,7 +117,6 @@ def check_user(username):
         return rows[1] == username
     else:
         return False
-
 
 def signup_flow(username, password):
     '''
@@ -138,11 +135,10 @@ def signup_flow(username, password):
         print("User has been created!")
         return True
 
-
 def login_flow(username, password):
     """
     (string, string) -> Bool
-
+    Logs in the user
     1. Pull up hashed password in DB
     2. Compare it with clients password
 
@@ -153,24 +149,20 @@ def login_flow(username, password):
         cursor = connection.cursor()
         rows = cursor.execute(sql_statement, [username]).fetchone()
         stored_password = rows[2]
+
         if password != None:
             if bcrypt.checkpw(password.encode('utf-8'), stored_password):
-                # print("Match")  debugging, remove before submission
                 return True
             else:
-                # debugging, remove before submission
-                #print("It Does Not Match")
+                
                 return False
     else:
         return "User does not exist"
-
-print(login_flow("duckpile","badpassword"))
 
 def check_setup_status(username):
     """
     (string) -> Bool
     This method checks if a user has finished setup
-
     1. Get ID from username
     2. Access the status table
     """
@@ -180,22 +172,56 @@ def check_setup_status(username):
     cursor = connection.cursor()
 
     rows = cursor.execute(sql_statement, [UID]).fetchone()
-    if rows is not None:
-        setup_status = rows[0]
-        return setup_status
-
+    if rows != None:
+        if rows[0] == "False":
+            print("not setup yet")
+            return False
+        else:
+            
+            return True
+  
 
 def update_setup_status(username):
     """
     This method updates the False value to True upon completing the setup process
     1. Update Flase for given UID to True
+
     """
-    return None
+    UID = pull_id(username)
+
+    try:
+        sql_statement = "UPDATE status SET setup_status = ? WHERE UID = ? "
+
+        cursor = connection.cursor()
+        cursor.execute(sql_statement,["True",UID])
+        connection.commit()
+        return True
+    except Error as e:
+        print(e)
+        return False
+
+def update_stage(username,new_stage):
+    """
+    Updates the setup stage in the status table
+    """
+    UID = pull_id(username)
+
+    try:
+        sql_statement = "UPDATE status SET stage = ? WHERE UID = ?"
+        cursor = connection.cursor()
+        cursor.execute(sql_statement,[new_stage,UID])
+        connection.commit()
+        return True
+    except Error as e:
+        print(e)
+        return False
+
 
 
 def insert_business(username, business_name, URL):
     """
     (string,string,string) -> Bool
+    Adds a business name and URL for a given user.
     1. Check to see if anything is there with the UID
     2. If not, commit
     3. If yes, return error "Business name and URL already entered"
@@ -221,16 +247,13 @@ def insert_business(username, business_name, URL):
         print("Business Already exists with current User ID")
         return False
 
-
 def generate_campaign_id():
     """
     (NoneType) -> str
     Generates new campaign and adds it to the campaign table
-    Note: Campaign ID is randomly generated here
+    Campaign ID is randomly generated here.
+    Also checks if an existing campaign ID is present, if not then the one that is generated gets appended.
 
-    example campaign ID: 10009812
-
-    1000 + 4 digits as a string
 
     1. Pull UID from current session
     2. Pull campaign_name and cityfrom form data (this needs to be a table)
@@ -248,10 +271,11 @@ def generate_campaign_id():
         new_campaign_id = '1000' + str(id_cap)
         return new_campaign_id
 
-
 def generate_campaign_row(UID, location):
     """
     (int,str) -> Bool
+    Retrieves the coordinates for a given location provided by the user.
+    Generates a dictionary object for a given row
     1. Generate Lat, Long from location name
     2. Parses str into list, then adds list items using a for loop for given UID
 
@@ -270,7 +294,6 @@ def generate_campaign_row(UID, location):
     location_dictionary["longitude"] = geodata[2]
 
     return location_dictionary
-
 
 def insert_campaign_row(location_row):
     """
@@ -296,10 +319,11 @@ def insert_campaign_row(location_row):
     except Error as e:
         return(e)
 
-
-def multiple_campaigns(UID, raw_locations):
+def add_multiple_campaigns(UID, raw_locations):
     """
     (str,str) -> Bool
+    This adds one row at a time after it has been generated with the appropriate data.
+    It also makes sure that the system adds one row per location.
     """
     #"loc1, loc2, loc3"
 
@@ -317,7 +341,6 @@ def multiple_campaigns(UID, raw_locations):
     else:
         return False
 
-
 def insert_product(UID, product):
     """
     (str,str) -> Bool
@@ -334,10 +357,10 @@ def insert_product(UID, product):
     except Error as e:
         return(e)
 
-
 def product_controller(UID, raw_products):
     """
     (str,str) -> NoneType
+    Inserts all products provided by the user, this method also ensures that one row is added per product.
     """
     True_count = 0
     product_list = raw_products.split(",")
@@ -350,10 +373,9 @@ def product_controller(UID, raw_products):
     else:
         return False
 
-
 def get_markers(username):
     """
-    duckpile UID = 6350
+    
     (str) -> list
     TODO:
     Need to make a dict out of each row
@@ -362,10 +384,11 @@ def get_markers(username):
     UID = pull_id(username)
     sql_statement = "SELECT city, lattitude, longitude FROM campaign WHERE UID = ?"
     cursor = connection.cursor()
-    location_list = cursor.execute(sql_statement, [UID]).fetchall()
-
+    raw_locations = cursor.execute(sql_statement, [UID]).fetchall()
+    location_list = []
+    for index in raw_locations:
+        location_list.append(index[0])
     return location_list
-
 
 def campaign_num(username):
     """
@@ -380,19 +403,44 @@ def campaign_num(username):
     return city_count[0]
 
 
-def campaign_retrieval(username):
+def update_password_transaction(username, new_password):
     """
-    TODO
-    1. make a dict ready for json parsing
-    2. Pull info from campaign table
+    (str,str) -> bool
+    SQL Transaction for updating the password in the users table
     """
+    try:
+        sql_statement = "UPDATE users SET password = ? WHERE username = ?"
+        cursor = connection.cursor()
+        cursor.execute(sql_statement,[new_password,username])
+        connection.commit()
+        
+        return True
+        
+    except Error as e:
 
-    markers = {
-        "city": "", "lattitude": "", "longitude": ""}
+        print(e)
+        return False
 
+
+
+def update_password(username, old_password, new_password):
+    """
+    (str,str,str) -> bool
+
+    Updates the users password
+
+    1. check if current password is correct
+    2. Invoke the SQL Transaction
+
+    """
     
-    jsonStr = json.dumps(markers)
-    return jsonStr
+    if login_flow(username, old_password) == True:
+        updated_password = crypto.encrypt(new_password)
+  
+        if  update_password_transaction(username,updated_password) == True:
+            return True
+    else:
 
-
+        print("password does not match")
+        return False
 

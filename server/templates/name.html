@@ -1,109 +1,113 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
 
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300&display=swap" rel="stylesheet" />
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-    }
+      html {
+        font-family: "Titillium Web", sans-serif;
+      }
 
-    html {
-      font-family: "Titillium Web", sans-serif;
+      .menu {
+        display: flex;
+        justify-content: space-between;
+        flex-direction: row;
 
-    }
+        align-items: center;
+        margin-bottom: 10%;
+      }
 
-    .menu {
-      display: flex;
-      justify-content: space-between;
-      flex-direction: row;
+      .menu_item {
+        color: black;
+        text-decoration: none;
+        font-weight: bold;
+        border: solid 3px black;
+        border-radius: 10px;
+        font-size: 18px;
+        padding: 0 10px;
+        margin: 0 15px;
+      }
 
-      align-items: center;
-      margin-bottom: 10%;
-    }
+      .menu_item:hover {
+        background-color: black;
+        color: white;
+        transition: 0.25s;
+      }
 
-    .menu a {
-      color: black;
-      text-decoration: none;
-      font-weight: bold;
-      border: solid 3px black;
-      border-radius: 10px;
-      font-size: 18px;
-      padding: 0 10px;
-      margin: 0 15px;
-    }
+      .logo {
+        width: 250px;
+        transition: 0.25s;
+      }
+      .name_container {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        margin-left: 40%;
+      }
 
-    .menu a:hover {
-      background-color: black;
-      color: white;
-      transition: 0.25s;
-    }
+      .message {
+        color: red;
+        font-weight: bold;
+      }
+    </style>
+  </head>
 
-    .logo {
-      border-radius: 10px;
-      border: solid 5px black;
-      width: 130px;
-      margin: 15px;
-      padding: 4px;
-      text-align: center;
-    }
-
-    .logo:hover {
-      border: solid 5px white;
-      transition: 0.25s;
-      background-color: black;
-      color: white;
-    }
-
-    .name_container {
-      display: flex;
-      justify-content: center;
-    }
-  </style>
-</head>
-
-<body>
-  <div class="menu">
-    <div>
-      <h1 class="logo">Adbuddy</h1>
-    </div>
-    <div>
-      <a href="/logout">Logout</a>
-    </div>
-  </div>
-
-  <h1>Business Name and URL</h1>
-  <div class="name_container">
-
-    <br>
-
-    <form action="setup_name" method="post">
-      <div class="input_field">
-
-        <input type="text" placeholder="Business Name" name="business_name" value="{{
-                  request.form.business_name }}">
-      </div>
-      <div class="input_field">
-        <input type="text" placeholder="URL" name="URL" value="{{
-                  request.form.URL }}">
+  <body>
+    <div class="menu">
+      <div>
+        <a href="/" class="logo">
+          <img src="{{url_for('static', filename='logo.png')}}" class="logo" />
+        </a>
       </div>
       <div>
-        <input class="btn btn-default" type="submit" value="Submit">
+        <a href="/" class="menu_item">Home</a>
+        <a href="/logout" class="menu_item">Logout</a>
       </div>
-
-
-    </form>
-    {% if error %}
-    <div class="error"><strong>Error:</strong> {{ error }}
-      {% endif %}
-
-
-
     </div>
-</body>
 
+    <div class="name_container">
+      <div>
+        <h1>Business Name and URL</h1>
+        <br />
+
+        <form action="setup_name" method="post">
+          <div class="input_field">
+            <input
+              type="text"
+              placeholder="Business Name"
+              name="business_name"
+              value="{{
+                    request.form.business_name }}"
+            />
+          </div>
+          <div class="input_field">
+            <input
+              type="text"
+              placeholder="URL"
+              name="URL"
+              value="{{
+                    request.form.URL }}"
+            />
+          </div>
+          <div>
+            <input class="btn btn-default" type="submit" value="Submit" />
+          </div>
+        </form>
+        {% with messages = get_flashed_messages() %} {% if messages %} {% for
+        message in messages %}
+        <p class="message">{{ message }}</p>
+        {% endfor %} {% endif %} {% endwith %}
+      </div>
+    </div>
+  </body>
 </html>

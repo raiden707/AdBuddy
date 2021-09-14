@@ -1,117 +1,118 @@
 <html>
-  <head>
-    <title>Login page</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      *{
-        margin: 0;
-        padding: 0;
-      }
 
-      html{
-        font-family: "Titillium Web", sans-serif;
+<head>
+  <title>Login page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
 
-      }
-      h1{
-        
-        text-align: center;
-      }
-      .login_container{
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        
-        width: auto;
-        justify-content: center;
-        
-      }
-      .error{
-        margin-top: 10px;
-      }
+    html {
+      font-family: "Titillium Web", sans-serif;
 
-      .menu {
-        display: flex;
-        justify-content: space-between;
-        flex-direction: row;
+    }
 
-        align-items: center;
-        margin-bottom: 10%;
-      }
-      .menu a {
-        color: black;
-        text-decoration: none;
-        font-weight: bold;
-        border: solid 3px black;
-        border-radius: 10px;
-        font-size: 18px;
-        padding: 0 10px;
-        margin: 0 15px;
-      }
-      .menu a:hover {
-        background-color: black;
-        color: white;
-        transition: 0.25s;
-      }
-      .logo {
-        border-radius: 10px;
-        border: solid 5px black;
-        width: 130px;
-        margin: 15px;
-        padding: 4px;
-        text-align: center;
-      }
+    h1 {
 
-      .logo:hover {
-        border: solid 5px white;
-        transition: 0.25s;
-        background-color: black;
-        color: white;
-      }
-      
-    </style>
-  </head>
-  <body>
-    <div class="menu">
-      <div>
-        <h1 class="logo">Adbuddy</h1>
-      </div>
-      <div>
-        <a href="/">Home</a>
-      </div>
+      text-align: center;
+    }
+
+    .login_container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      width: auto;
+      justify-content: center;
+
+    }
+
+    .error {
+      margin-top: 10px;
+    }
+
+    .menu {
+      display: flex;
+      justify-content: space-between;
+      flex-direction: row;
+
+      align-items: center;
+      margin-bottom: 10%;
+    }
+
+    .menu_item {
+      color: black;
+      text-decoration: none;
+      font-weight: bold;
+      border: solid 3px black;
+      border-radius: 10px;
+      font-size: 18px;
+      padding: 0 10px;
+      margin: 0 15px;
+    }
+
+    .menu_item:hover {
+      background-color: black;
+      color: white;
+      transition: 0.25s;
+    }
+
+
+
+    .logo {
+      width: 250px;
+      transition: 0.25s;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="menu">
+    <div>
+      <a href="/" class="logo">
+        <img src="{{url_for('static', filename='logo.png')}}" class="logo" />
+
+
+      </a>
     </div>
-    <h1 >Login</h1>
-    <div class="login_container">
-      
-      <br>
-      
-        <form action="" method="post">
-          <div >
+    <div>
+      <a href="/" class="menu_item">Home</a>
+      <a href="/signup" class="menu_item">Sign Up</a>
+    </div>
+  </div>
+  <h1>Login</h1>
+  <div class="login_container">
 
-            <input type="text" placeholder="Username" name="username" value="{{
+    <br>
+
+    <form action="login" method="post">
+      <div>
+
+        <input type="text" placeholder="Username" name="username" value="{{
               request.form.username }}">
-          </div>
-          <div c>
-            <input type="password" placeholder="Password" name="password" value="{{
+      </div>
+      <div >
+        <input type="password" placeholder="Password" name="password" value="{{
               request.form.password }}">
-          </div>
-          <div>
-            <input class="btn btn-default" type="submit" value="Login">
-          </div>
- 
-           
-          </form>
-        {% if error %}
-          <div class="error"><strong>Error:</strong> {{ error }}
-        {% endif %}
+      </div>
+      <div>
+        <input class="btn btn-default" type="submit" value="Login">
+      </div>
 
-     
-      
+
+    </form>
+    {% if error %}
+    <div class="error"><strong>Error:</strong> {{ error }}
+      {% endif %}
+
+
+
     </div>
-  </body>
+</body>
+
 </html>

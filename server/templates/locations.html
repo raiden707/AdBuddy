@@ -18,85 +18,83 @@
       html {
         font-family: "Titillium Web", sans-serif;
       }
+
       body {
         margin: 0;
         padding: 0;
       }
+
       .locations_container {
         display: flex;
         justify-content: center;
         height: 500px;
       }
+
       .box {
         width: 70%;
         display: flex;
         justify-content: center;
       }
+
       .locations {
         border-radius: 15px;
         width: 500px;
         height: 100px;
       }
+
       .submit_button {
         text-align: center;
         height: 50px;
         width: 80px;
       }
+
       input {
         outline: none;
       }
-      
-    .menu {
-      display: flex;
-      justify-content: space-between;
-      flex-direction: row;
 
-      align-items: center;
-      margin-bottom: 10%;
-    }
+      .menu {
+        display: flex;
+        justify-content: space-between;
+        flex-direction: row;
 
-    .menu a {
-      color: black;
-      text-decoration: none;
-      font-weight: bold;
-      border: solid 3px black;
-      border-radius: 10px;
-      font-size: 18px;
-      padding: 0 10px;
-      margin: 0 15px;
-    }
+        align-items: center;
+        margin-bottom: 10%;
+      }
 
-    .menu a:hover {
-      background-color: black;
-      color: white;
-      transition: 0.25s;
-    }
+      .menu_item {
+        color: black;
+        text-decoration: none;
+        font-weight: bold;
+        border: solid 3px black;
+        border-radius: 10px;
+        font-size: 18px;
+        padding: 0 10px;
+        margin: 0 15px;
+      }
 
-    .logo {
-      border-radius: 10px;
-      border: solid 5px black;
-      width: 130px;
-      margin: 15px;
-      padding: 4px;
-      text-align: center;
-    }
+      .menu_item:hover {
+        background-color: black;
+        color: white;
+        transition: 0.25s;
+      }
 
-    .logo:hover {
-      border: solid 5px white;
-      transition: 0.25s;
-      background-color: black;
-      color: white;
-    }
-
+      .logo {
+        width: 250px;
+        transition: 0.25s;
+      }
     </style>
   </head>
+
   <body>
     <div class="menu">
       <div>
-        <h1 class="logo">Adbuddy</h1>
+        <a href="/" class="logo">
+          <img src="{{url_for('static', filename='logo.png')}}" class="logo" />
+        </a>
       </div>
       <div>
-        <a href="/logout">Logout</a>
+        <a href="/" class="menu_item">Home</a>
+        <a href="/logout" class="menu_item">Logout</a>
       </div>
     </div>
     <h1 style="text-align: center">Locations</h1>
@@ -121,5 +119,9 @@
         </form>
       </div>
     </div>
+    {% with messages = get_flashed_messages() %} {% if messages %} {% for
+    message in messages %}
+    <p class="message">{{ message }}</p>
+    {% endfor %} {% endif %} {% endwith %}
   </body>
 </html>

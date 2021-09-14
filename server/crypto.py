@@ -14,7 +14,14 @@ def password_check(password, hashed_password):
     Checks if password is correct
     """
     if bcrypt.checkpw(password, hashed_password):
-        print("It matches!")
+        print("It matches")
     else:
-        print("Does not match!")
+        print("No match :(")
         
+def test_crypto(password):
+    
+    hashed = encrypt(password)
+    return password_check(password.encode('utf-8'),hashed)
+
+
+    

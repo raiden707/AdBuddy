@@ -2,72 +2,122 @@
 <html>
 
 <head>
-    <meta charset="utf-8" />
-    <title>Adbuddy</title>
-    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300&display=swap" rel="stylesheet" />
+  <meta charset="utf-8" />
+  <title>Adbuddy</title>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300&display=swap" rel="stylesheet" />
 
-    <style>
-        html {
-            font-family: "Titillium Web", sans-serif;
-        }
+  <style>
+    html {
+      font-family: "Titillium Web", sans-serif;
+    }
 
-        body {
-            margin: 0;
-            padding: 0;
-        }
+    body {
+      margin: 0;
+      padding: 0;
+    }
 
-        .product_container {
-            display: flex;
-            justify-content: center;
+    .product_container {
+      display: flex;
+      justify-content: center;
 
-            height: 500px;
-        }
+      height: 500px;
+    }
 
-        .box {
+    .box {
 
-            width: 70%;
-            display: flex;
-            justify-content: center;
-        }
+      width: 70%;
+      display: flex;
+      justify-content: center;
+    }
 
-        .products {
-            border-radius: 15px;
-            width: 500px;
-            height: 100px;
-        }
+    .products {
+      border-radius: 15px;
+      width: 500px;
+      height: 100px;
+    }
 
-        .submit_button {
-            text-align: center;
-        }
+    .submit_button {
+      text-align: center;
+    }
 
-        input {
-            outline: none;
-        }
-    </style>
+    input {
+      outline: none;
+    }
+
+    .menu {
+      display: flex;
+      justify-content: space-between;
+      flex-direction: row;
+
+      align-items: center;
+      margin-bottom: 10%;
+    }
+
+    .menu_item {
+        color: black;
+        text-decoration: none;
+        font-weight: bold;
+        border: solid 3px black;
+        border-radius: 10px;
+        font-size: 18px;
+        padding: 0 10px;
+        margin: 0 15px;
+      }
+
+      .menu_item:hover {
+        background-color: black;
+        color: white;
+        transition: 0.25s;
+      }
+
+      
+
+      .logo{
+        width: 250px;
+        transition: 0.25s;
+      }
+  </style>
 </head>
 
 <body>
-    <h1 style="text-align: center">Products</h1>
-    <div class="product_container">
-        <div class="box">
-            <form action="add_products" method="post">
-                <div>
-                    <input type="text" class="products" name="products" value="{{
+  <div class="menu">
+    <div>
+      <a href="/" class="logo">
+        <img src="{{url_for('static', filename='logo.png')}}" class="logo" />
+
+
+      </a>
+    </div>
+    <div>
+      <a href="/" class="menu_item">Home</a>
+      <a href="/logout" class="menu_item">Logout</a>
+    </div>
+  </div>
+  <h1 style="text-align: center">Products</h1>
+  <div class="product_container">
+    <div class="box">
+      <form action="add_products" method="post">
+        <div>
+          <input type="text" class="products" name="products" value="{{
               request.form.products }}" /><br /><br />
 
-                    <input type="submit" style="margin-left: 32%" class="submit_button" />
-                </div>
-            </form>
-            {% if error %}
-            <div class="error"><strong>Error:</strong> {{ error }}
-                {% endif %}
-
-
-            </div>
+          <input type="submit" style="margin-left: 32%" class="submit_button" />
         </div>
+      </form>
+      {% if error %}
+      <div class="error"><strong>Error:</strong> {{ error }}
+        {% endif %}
+
+
+      </div>
+    </div>
+    {% with messages = get_flashed_messages() %} {% if messages %} {% for
+      message in messages %}
+      <p class="message">{{ message }}</p>
+      {% endfor %} {% endif %} {% endwith %}
 </body>
 
 </html>

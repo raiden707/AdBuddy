@@ -1,5 +1,6 @@
-from flask import Flask, request, render_template, redirect, url_for, session
-from data_layer import check_setup_status, insert_business, login_flow, product_controller, signup_flow, pull_id, multiple_campaigns, get_markers
+import re
+from flask import Flask, request, render_template, redirect, url_for, session, flash
+from data_layer import add_multiple_campaigns, check_setup_status, insert_business, login_flow, product_controller, signup_flow, pull_id, get_markers, update_password, update_setup_status, update_stage
 from datetime import datetime, timedelta
 
 import os
@@ -14,8 +15,10 @@ app.permanent_session_lifetime = timedelta(
 
 @app.route("/", methods=['GET'])
 def home():
-    return render_template('home.html')
-
+    if "username" in session:
+        return render_template('home_authenticated.html')
+    else:
+        return render_template('home.html')
 
 
 @app.route("/signup", methods=['GET', 'POST'])
@@ -56,15 +59,16 @@ def login():
 
         if login_flow(username, password) == True:
 
-            if check_setup_status(username) == "False":
-                print(username, "has logged in at",datetime.now())
+            if check_setup_status(username) == False:
+
+                print(username, "has logged in at", datetime.now())
                 return redirect(url_for("setup"))
             else:
                 return redirect(url_for("dashboard"))
 
         else:
             error = "Credentials Do Not Match"
-            print(username, "Attempted to login at",datetime.now())
+            print(username, "Attempted to login at", datetime.now())
             return render_template("login.html", error=error)
 
     else:
@@ -76,10 +80,11 @@ def setup():
     error = None
     if request.method == 'GET':
         if "username" in session:
-
             username = session["username"]
-
-            return render_template("name.html", error=error)
+            if check_setup_status(username) == True:
+                return redirect(url_for("dashboard"))
+            else:
+                return render_template("name.html", error=error)
         else:
             return redirect(url_for("login"))
 
@@ -91,15 +96,17 @@ def setup_name():
         if "username" in session:
             username = session["username"]
             UID = pull_id(username)
-            # print(UID)
             business_name = request.form["business_name"]
             URL = request.form["URL"]
-            if insert_business(username, business_name, URL) == True:
-                return redirect(url_for("locations"))
+            if business_name == None or URL == None:
+                flash("Please provide both the name of your business and URL")
             else:
+                if insert_business(username, business_name, URL) == True:
+                    update_stage(username, "locations")
+                    return redirect(url_for("locations"))
+                else:
 
-                error = "Business Already exists with current User ID"
-                return render_template("name.html", error=error)
+                    return render_template("name.html", error=error)
         else:
             return redirect(url_for("login"))
 
@@ -110,7 +117,10 @@ def locations():
     if request.method == 'GET':
         if "username" in session:
             username = session["username"]
-            return render_template("locations.html", error=error)
+            if check_setup_status(username) == True:
+                return redirect(url_for("dashboard"))
+            else:
+                return render_template("locations.html", error=error)
         else:
             return redirect(url_for("login"))
 
@@ -124,13 +134,16 @@ def add_locations():
         if "username" in session:
             username = session["username"]
             UID = pull_id(username)
-            locations = request.form["locations"]
+            locations = request.form.get("locations")
 
-            if multiple_campaigns(UID, locations) == True:
-                return redirect(url_for("products"))
-            else:
-                error = "Please check the spelling of all locations"
+            if locations == "":
+                flash("You must provide at least one city")
                 return render_template("locations.html", error=error)
+            else:
+                add_multiple_campaigns(UID, locations)
+                flash("Adding campaigns...")
+                update_stage(username, "products")
+                return redirect(url_for("products"))
 
         else:
             return redirect(url_for("login"))
@@ -140,7 +153,12 @@ def add_locations():
 def products():
     error = None
     if "username" in session:
-        return render_template("products.html", error=error)
+        username = session["username"]
+
+        if check_setup_status(username) == True:
+            return redirect(url_for("dashboard"))
+        else:
+            return render_template("products.html", error=error)
     else:
         return redirect(url_for("login"))
 
@@ -154,43 +172,91 @@ def add_products():
         username = session["username"]
         UID = pull_id(username)
         raw_products = request.form["products"]
-        if product_controller(UID, raw_products) == True:
-            return redirect(url_for("dashboard"))
-        else:
-            error = "Something went wrong"
+        if raw_products == "":
+            flash("You must provide at least one product to advertise")
             return render_template("products.html", error=error)
+        else:
+
+            if product_controller(UID, raw_products) == True:
+
+                update_setup_status(username)
+                update_stage(username, "dashboard")
+                return redirect(url_for("dashboard"))
+            else:
+                error = "Something went wrong"
+                return render_template("products.html", error=error)
 
     else:
         return redirect(url_for("login"))
 
 
-@app.route("/dashboard",methods=['GET'])
+@app.route("/dashboard", methods=['GET'])
 def dashboard():
     if "username" in session:
         username = session["username"]
-        location_list = get_markers(username)
-        return render_template("dashboard.html", username=username, location_list = location_list)
+        buffer_list = get_markers(username)
+        location_list = ""
+
+        if len(buffer_list) == 1:
+            location_list = buffer_list[0]
+        else:
+            for i in buffer_list:
+                location_list += i + ','
+        return render_template("dashboard.html", username=username, location_list=location_list)
     else:
         return redirect(url_for("login"))
 
-@app.route("/account",methods=['GET'])
+
+@app.route('/update_locations',methods=['POST'])
+def update_locations():
+    if "username" in session:
+        username = session["username"]
+        updated_locations = request.form.get("location_list")
+        return redirect(url_for("dashboard"))
+
+
+@app.route('/update_products',methods=['POST'])
+def update_products():
+    if "username" in session:
+        username = session["username"]
+        updated_products = request.form.get("update_products")
+        return redirect(url_for("dashboard"))
+
+
+
+@app.route("/account", methods=['GET', 'POST'])
 def account():
     if "username" in session:
         username = session["username"]
-        return render_template("account.html", username = username)
+        return render_template("account.html", username=username)
     else:
         return redirect(url_for("login"))
 
-@app.route("/change_password",methods=['POST'])
+
+@app.route("/change_password", methods=['POST'])
 def change_password():
+    error = None
     if "username" in session:
         username = session["username"]
-        current_password = request.form["current_password"]
-        new_password = request.form["new_password"]
-        confirm_password = request.form["confirm_password"]
-        
+
+        current_password = request.form.get("current_password")
+        new_password = request.form.get("new_password")
+        confirm_password = request.form.get("confirm_password")
+
+        if login_flow(username, current_password) == True:
+            if new_password == confirm_password:
+                if update_password(username, current_password, new_password) == True:
+
+                    flash('Password updated successfully!')
+                    return redirect(url_for("dashboard"))
+        else:
+            flash('You need to provide the correct password!')
+            return redirect(url_for("account"))
+
+        return render_template("account.html", username=username)
+
     else:
-        return redirect(url_for("login"))        
+        return redirect(url_for("login"))
 
 
 
